@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/booking');
@@ -18,7 +19,7 @@ if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'mishra';
 }
 if (!process.env.PORT) {
-  process.env.PORT = '5000';
+  process.env.PORT = process.env.NODE_ENV === 'production' ? '80' : '5000';
 }
 
 console.log('Environment variables loaded:');
@@ -28,8 +29,16 @@ console.log('PORT:', process.env.PORT);
 
 const app = express();
 
+// In production, allow the deployed frontend domain
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+
+// Add your production domain when deployed
+if (process.env.NODE_ENV === 'production' && process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
@@ -44,6 +53,17 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/location', locationRoutes);
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+  // Any route that doesn't match API routes will serve the React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 

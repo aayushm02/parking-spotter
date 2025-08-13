@@ -98,7 +98,7 @@ const Map = () => {
           console.log(' Got user location:', { latitude, longitude });
 
           try {
-            const response = await axios.post('http://localhost:5000/api/location', {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL || '/api'}/location`, {
               latitude,
               longitude,
               userId: 'user123',
@@ -170,7 +170,7 @@ const Map = () => {
     const fetchInitialSpotsFallback = async () => {
       if (!mapData) { 
         try {
-          const res = await axios.get('http://localhost:5000/api/location/spots');
+          const res = await axios.get(`${process.env.REACT_APP_API_URL || '/api'}/location/spots`);
           if (res.data.success) {
             setMapData({
               center: defaultCenter,
@@ -330,7 +330,7 @@ const Map = () => {
     
     // Send to backend
     try {
-      axios.post('http://localhost:5000/api/location/addParkingSpot', newSpot)
+      axios.post(`${process.env.REACT_APP_API_URL || '/api'}/location/addParkingSpot`, newSpot)
         .then(response => {
           console.log('Added new parking spot to backend:', response.data);
         })
