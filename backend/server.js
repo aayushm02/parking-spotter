@@ -12,9 +12,13 @@ const locationRoutes = require('./routes/location');
 dotenv.config();
 
 // Fallback environment variables if .env doesn't load
-if (!process.env.MONGO_URI) {
-  process.env.MONGO_URI = 'mongodb://localhost:27017/parking_spot_finder';
-}
+// if (!process.env.MONGO_URI) {
+//   process.env.MONGO_URI = 'mongodb://localhost:27017/parking_spot_finder';
+// }
+
+
+
+
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'mishra';
 }
@@ -30,7 +34,7 @@ console.log('PORT:', process.env.PORT);
 const app = express();
 
 // In production, allow the deployed frontend domain
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+const allowedOrigins = [process.env.FRONTEND_URL];
 
 // Add your production domain when deployed
 if (process.env.NODE_ENV === 'production' && process.env.FRONTEND_URL) {
