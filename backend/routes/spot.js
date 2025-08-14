@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { body, query } = require('express-validator');
 const spotController = require('../controllers/spotController');
@@ -38,16 +37,18 @@ const searchValidation = [
 router.get('/', searchValidation, optionalAuth, spotController.getAllSpots);
 router.get('/search', searchValidation, optionalAuth, spotController.searchSpots);
 router.get('/nearby', searchValidation, optionalAuth, spotController.getNearbySpots);
-router.get('/:id', optionalAuth, spotController.getSpotById);
+
+// Owner routes
+router.get('/owner/my-spots', authenticateToken, authorizeRoles('spot_owner', 'admin'), spotController.getMySpots);
+router.put('/:id/availability', authenticateToken, authorizeRoles('spot_owner', 'admin'), spotController.updateAvailability);
+
+// Favorite routes
+router.get('/user/favorites', authenticateToken, spotController.getFavorites);
 
 // Protected routes
 router.post('/', authenticateToken, authorizeRoles('spot_owner', 'admin'), createSpotValidation, spotController.createSpot);
 router.put('/:id', authenticateToken, updateSpotValidation, spotController.updateSpot);
 router.delete('/:id', authenticateToken, spotController.deleteSpot);
-
-// Owner routes
-router.get('/owner/my-spots', authenticateToken, authorizeRoles('spot_owner', 'admin'), spotController.getMySpots);
-router.put('/:id/availability', authenticateToken, authorizeRoles('spot_owner', 'admin'), spotController.updateAvailability);
 
 // Rating routes
 router.post('/:id/rating', authenticateToken, [
@@ -55,15 +56,17 @@ router.post('/:id/rating', authenticateToken, [
   body('comment').optional().isLength({ max: 500 }).withMessage('Comment cannot exceed 500 characters')
 ], spotController.addRating);
 
-// Favorite routes
+// Favorite modification routes
 router.post('/:id/favorite', authenticateToken, spotController.addToFavorites);
 router.delete('/:id/favorite', authenticateToken, spotController.removeFromFavorites);
-router.get('/user/favorites', authenticateToken, spotController.getFavorites);
 
 // Report routes
 router.post('/:id/report', authenticateToken, [
   body('reason').notEmpty().withMessage('Reason is required'),
   body('description').optional().isLength({ max: 500 }).withMessage('Description cannot exceed 500 characters')
 ], spotController.reportSpot);
+
+// Dynamic route last
+router.get('/:id', optionalAuth, spotController.getSpotById);
 
 module.exports = router;
