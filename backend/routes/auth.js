@@ -45,4 +45,4 @@ router.put('/change-password', authenticateToken, [
 ], authController.changePassword);
 router.delete('/me', authenticateToken, authController.deleteAccount);
 
-module.exports = router;
+module.exports = auth-router;
